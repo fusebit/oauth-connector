@@ -22,7 +22,10 @@ const installCtx = createCtx(
                 vendor_oauth_scope: '{vendor_oauth_scope}',
                 vendor_oauth_client_id: '{vendor_oauth_client_id}',
                 vendor_oauth_client_secret: '{vendor_oauth_client_secret}',
+                vendor_oauth_audience: '{vendor_oauth_audience}',
+                vendor_oauth_extra_params: '{vendor_oauth_extra_params}',
                 vendor_name: '{vendor_name}',
+                vendor_prefix: '{vendor_prefix}',
                 fusebit_allowed_return_to: '{fusebit_allowed_return_to}',
             },
             metadata: {

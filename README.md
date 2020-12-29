@@ -9,7 +9,7 @@ Assuming you are a subscriber of [Fusebit](https://fusebit.io), you would start 
 ```
 git clone git@github.com:fusebit/oauth-connector.git
 cd oauth-connector
-fuse function deploy --boundary managers contoso-oauth-manager -d ./fusebit
+fuse function deploy --boundary managers oauth-connector-manager -d ./fusebit
 ```
 
 Soon enough you will be writing code of your integration logic. Get in touch at [Fusebit](https://fusebit.io) for further instructions or to learn more.

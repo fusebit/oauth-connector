@@ -28,9 +28,12 @@ const configureCtx = createCtx(
             vendor_oauth_authorization_url: 'https://idp.com/authorize',
             vendor_oauth_token_url: 'https://idp.com/token',
             vendor_oauth_scope: 'sample-scope',
+            vendor_oauth_audience: 'sample-audience',
             vendor_oauth_client_id: '123',
             vendor_oauth_client_secret: '456',
+            vendor_oauth_extra_params: 'sample-extra-param=12',
             vendor_name: 'Contoso',
+            vendor_prefix: 'contoso',
             fusebit_allowed_return_to: '*',
         },
     },
@@ -50,9 +53,12 @@ const callbackCtx = (state) =>
                 vendor_oauth_authorization_url: 'https://idp.com/authorize',
                 vendor_oauth_token_url: 'https://idp.com/token',
                 vendor_oauth_scope: 'sample-scope',
+                vendor_oauth_audience: 'sample-audience',
                 vendor_oauth_client_id: '123',
                 vendor_oauth_client_secret: '456',
+                vendor_oauth_extra_params: 'sample-extra-param=12',
                 vendor_name: 'Contoso',
+                vendor_prefix: 'contoso',
                 fusebit_allowed_return_to: '*',
             },
         },
@@ -67,9 +73,12 @@ const getTokenCtx = createCtx(
             vendor_oauth_authorization_url: 'https://idp.com/authorize',
             vendor_oauth_token_url: 'https://idp.com/token',
             vendor_oauth_scope: 'sample-scope',
+            vendor_oauth_audience: 'sample-audience',
             vendor_oauth_client_id: '123',
             vendor_oauth_client_secret: '456',
+            vendor_oauth_extra_params: 'sample-extra-param=12',
             vendor_name: 'Contoso',
+            vendor_prefix: 'contoso',
             fusebit_allowed_return_to: '*',
         },
         caller: {
@@ -94,9 +103,12 @@ const getUserCtx = createCtx(
             vendor_oauth_authorization_url: 'https://idp.com/authorize',
             vendor_oauth_token_url: 'https://idp.com/token',
             vendor_oauth_scope: 'sample-scope',
+            vendor_oauth_audience: 'sample-audience',
             vendor_oauth_client_id: '123',
             vendor_oauth_client_secret: '456',
+            vendor_oauth_extra_params: 'sample-extra-param=12',
             vendor_name: 'Contoso',
+            vendor_prefix: 'contoso',
             fusebit_allowed_return_to: '*',
         },
         caller: {
@@ -115,6 +127,40 @@ const getUserCtx = createCtx(
     }
 );
 
+const postNotificationCtx = createCtx(
+    {
+        method: 'POST',
+        body: {
+            text: 'hello, world',
+        },
+        configuration: {
+            vendor_oauth_authorization_url: 'https://idp.com/authorize',
+            vendor_oauth_token_url: 'https://idp.com/token',
+            vendor_oauth_scope: 'sample-scope',
+            vendor_oauth_audience: 'sample-audience',
+            vendor_oauth_client_id: '123',
+            vendor_oauth_client_secret: '456',
+            vendor_oauth_extra_params: 'sample-extra-param=12',
+            vendor_name: 'Contoso',
+            vendor_prefix: 'contoso',
+            fusebit_allowed_return_to: '*',
+        },
+        caller: {
+            permissions: {
+                allow: [
+                    {
+                        action: '*',
+                        resource: '/',
+                    },
+                ],
+            },
+        },
+    },
+    {
+        path: `/notification/789`,
+    }
+);
+
 const deleteUserCtx = createCtx(
     {
         method: 'DELETE',
@@ -122,9 +168,12 @@ const deleteUserCtx = createCtx(
             vendor_oauth_authorization_url: 'https://idp.com/authorize',
             vendor_oauth_token_url: 'https://idp.com/token',
             vendor_oauth_scope: 'sample-scope',
+            vendor_oauth_audience: 'sample-audience',
             vendor_oauth_client_id: '123',
             vendor_oauth_client_secret: '456',
+            vendor_oauth_extra_params: 'sample-extra-param=12',
             vendor_name: 'Contoso',
+            vendor_prefix: 'contoso',
             fusebit_allowed_return_to: '*',
         },
         caller: {
@@ -196,6 +245,8 @@ describe('connector', () => {
         expect(url.query.client_id).toBe('123');
         expect(url.query.response_type).toBe('code');
         expect(url.query.scope).toBe('sample-scope');
+        expect(url.query.audience).toBe('sample-audience');
+        expect(url.query['sample-extra-param']).toBe('12');
         expect(url.query.state).toBeDefined();
         expect(url.query.redirect_uri).toBe(
             `${profile.baseUrl}/v1/run/${profile.subscription}/${testBoundaryId}/${testFunctionId1}/callback`
@@ -243,11 +294,11 @@ describe('connector', () => {
         // Validate the 'data' that would normally be passed back to the add-on handler on installation:
         const data = JSON.parse(Buffer.from(url.query.data, 'base64'));
         expect(data).toMatchObject({
-            vendor_user_id: '789',
-            vendor_get_token_url: `${profile.baseUrl}/v1/run/${profile.subscription}/${testBoundaryId}/${testFunctionId1}/user/789/token`,
+            contoso_oauth_user_id: '789',
+            contoso_oauth_connector_base_url: `${profile.baseUrl}/v1/run/${profile.subscription}/${testBoundaryId}/${testFunctionId1}`,
         });
         // Validate storage content for the logged in user
-        response = await getStorage(testBoundaryId, testFunctionId1, oAuthConnector._getStorageIdForVendorUser(data.vendor_user_id));
+        response = await getStorage(testBoundaryId, testFunctionId1, oAuthConnector._getStorageIdForVendorUser(data.contoso_oauth_user_id));
         expect(response.status).toBe(200);
         expect(response.body).toBeDefined();
         expect(response.body.data).toBeDefined();
@@ -386,5 +437,75 @@ describe('connector', () => {
         ctx = getUserCtx;
         response = await handler(ctx);
         expect(response.status).toBe(404);
+    });
+
+    test('The custom POST /notification/:vendorUserId endpoint succeeds', async () => {
+        const { VendorOAuthConnector } = require('../lib/manager/template/VendorOAuthConnector');
+        class TestOAuthConnector extends VendorOAuthConnector {
+            async getAuthorizationPageHtml(fusebitContext, authorizationUrl) {
+                return undefined;
+            }
+            async getAccessToken(fusebitContext, authorizationCode, redirectUri) {
+                return {
+                    access_token: `access-token:${authorizationCode}`,
+                    expires_in: 10000,
+                };
+            }
+            async getUserProfile(tokenContext) {
+                return { id: '789' };
+            }
+            onCreate(app) {
+                app.post(
+                    '/notification/:vendorUserId',
+                    this.authorize({
+                        action: 'function:execute',
+                        resourceFactory: (req) =>
+                            `/account/${req.fusebit.accountId}/subscription/${req.fusebit.subscriptionId}/boundary/${
+                                req.fusebit.boundaryId
+                            }/function/${req.fusebit.functionId}/notification/${encodeURIComponent(req.params.vendorUserId)}/`,
+                    }),
+                    async (req, res, next) => {
+                        // Check if the user with the specifed ID has previously authenticated
+                        const userContext = await this.getUser(req.fusebit, req.params.vendorUserId);
+                        if (!userContext) {
+                            res.status(404);
+                            res.end();
+                        } else {
+                            // Ensure the access token for the user is current
+                            const tokenContext = await this.ensureAccessToken(req.fusebit, userContext);
+                            res.status(200);
+                            res.json({
+                                userId: req.params.vendorUserId,
+                                accessToken: tokenContext.access_token,
+                                payload: req.fusebit.body,
+                            });
+                        }
+                    }
+                );
+            }
+        }
+        const oAuthConnector = new TestOAuthConnector();
+        const handler = connector.createOAuthConnector(new TestOAuthConnector());
+        let ctx = configureCtx;
+        // Initiate the authorization transaction only to extract the 'state' parameter to pass to /callback later
+        let response = await handler(ctx);
+        expect(response.status).toBe(302);
+        expect(response.headers).toBeDefined();
+        expect(typeof response.headers.location).toBe('string');
+        let url = Url.parse(response.headers.location, true);
+        expect(url.query.state).toBeDefined();
+        ctx = callbackCtx(url.query.state);
+        response = await handler(ctx);
+        expect(response.status).toBe(302);
+        // Post notification
+        ctx = postNotificationCtx;
+        response = await handler(ctx);
+        expect(response.status).toBe(200);
+        expect(typeof response.body).toBe('string');
+        const body = JSON.parse(response.body);
+        expect(body.userId).toBe('789');
+        expect(body.accessToken).toBe('access-token:abc');
+        expect(body.payload).toBeDefined();
+        expect(body.payload.text).toBe('hello, world');
     });
 });
