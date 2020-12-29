@@ -79,6 +79,15 @@
                     vendor_prefix: 'contoso',
                     fusebit_allowed_return_to: '*'
                 });
+                const isRequired = {
+                    vendor_oauth_authorization_url: true,
+                    vendor_oauth_token_url: true,
+                    vendor_oauth_client_id: true,
+                    vendor_oauth_client_secret: true,
+                    vendor_name: true,
+                    vendor_prefix: true,
+                    fusebit_allowed_return_to: true
+                };
 
                 const getReturnUrl = (status, data) => {
                     let url = `${returnTo}?status=${status}&data=${encodeURIComponent(
@@ -116,27 +125,27 @@
                     window.location.href = getReturnUrl("success", newData);
                 };
 
-                const hasError = () => !!Object.keys(params).find(p => typeof params[p] === 'string' && !params[p].trim());
+                const hasError = () => !!Object.keys(params).find(p => isRequired[p] && !params[p].trim());
 
                 const emptyParam = (p) => !!params[p + '_error'];
 
-                const handleInput = (p, isRequired) => (event) => {
+                const handleInput = (p) => (event) => {
                     let newParams = { ...params };
                     newParams[p] = event.target.value;
-                    newParams[p + '_error'] = isRequired && typeof newParams[p] === 'string' && newParams[p].trim() === '';
+                    newParams[p + '_error'] = isRequired[p] && typeof newParams[p] === 'string' && newParams[p].trim() === '';
                     setParams(newParams);
                 };
 
-                const getInput = (p, label, description, isRequired, password) => (
+                const getInput = (p, label, description, password) => (
                     <Grid item xs={12}>
                         <TextField
                             id={p}
                             label={label}
-                            helperText={isRequired ? emptyParam(p) && `Required. ${description}` || description : `Optional. ${description}`}
-                            error={isRequired && emptyParam(p)}
+                            helperText={isRequired[p] ? emptyParam(p) && `Required. ${description}` || description : `Optional. ${description}`}
+                            error={isRequired[p] && emptyParam(p)}
                             variant="outlined"
                             value={params[p]}
-                            onChange={handleInput(p, isRequired)}
+                            onChange={handleInput(p)}
                             fullWidth
                             type={password && "password" || undefined}
                         />
@@ -156,16 +165,16 @@
                                                 data.baseUrl
                                             }/v1/run/{data.subscriptionId}/{data.boundaryId}/{data.functionId}/callback</DialogContentText>
                                         </Grid>
-                                        {getInput('vendor_name', 'Vendor name', 'Used for customizing UI', true)}
-                                        {getInput('vendor_prefix', 'Vendor configuration name prefix', 'Used as a prefix for configuration parameters created by this connector to distinguish from other connector instances', true)}
-                                        {getInput('vendor_oauth_authorization_url', 'Vendor\'s OAuth authorization URL', 'Web endpoint for starting the OAuth authorization flow', true)}
-                                        {getInput('vendor_oauth_token_url', 'Vendor\'s OAuth token endpoint URL', 'An OAuth token endpoint for obtaining access tokens', true)}
-                                        {getInput('vendor_oauth_client_id', 'Vendor\'s OAuth client Id', 'OAuth client Id', true)}
-                                        {getInput('vendor_oauth_client_secret', 'Vendor\'s OAuth client secret', 'OAuth client secret', true, true)}
+                                        {getInput('vendor_name', 'Vendor name', 'Used for customizing UI')}
+                                        {getInput('vendor_prefix', 'Vendor configuration name prefix', 'Used as a prefix for configuration parameters created by this connector to distinguish from other connector instances')}
+                                        {getInput('vendor_oauth_authorization_url', 'Vendor\'s OAuth authorization URL', 'Web endpoint for starting the OAuth authorization flow')}
+                                        {getInput('vendor_oauth_token_url', 'Vendor\'s OAuth token endpoint URL', 'An OAuth token endpoint for obtaining access tokens')}
+                                        {getInput('vendor_oauth_client_id', 'Vendor\'s OAuth client Id', 'OAuth client Id')}
+                                        {getInput('vendor_oauth_client_secret', 'Vendor\'s OAuth client secret', 'OAuth client secret', true)}
                                         {getInput('vendor_oauth_scope', 'Vendor\'s OAuth scope', 'OAuth scopes to request when obtaining tokens')}
                                         {getInput('vendor_oauth_audience', 'Vendor\'s OAuth audience', 'OAuth audience to request when obtaining tokens')}
                                         {getInput('vendor_oauth_extra_params', 'Vendor\'s OAuth additional parameters', 'Additional OAuth authorization request parameters, &-delimited and URL encoded')}
-                                        {getInput('fusebit_allowed_return_to', 'Allowed returnTo URLs', 'Allowed returnTo URLs, newline/comma/semicolon/space delimited. You can specify a wildcard (*) at the end of a URL to allow for a prefix match.', true)}
+                                        {getInput('fusebit_allowed_return_to', 'Allowed returnTo URLs', 'Allowed returnTo URLs, newline/comma/semicolon/space delimited. You can specify a wildcard (*) at the end of a URL to allow for a prefix match.')}
                                     </Grid>
                                 </Grid>
                             </Grid>

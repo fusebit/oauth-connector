@@ -3,6 +3,6 @@
         "node": "10"
     },
     "dependencies": {
-        "@fusebit/oauth-connector": "0.0.1-pre-2"
+        "@fusebit/oauth-connector": "0.0.1-pre-3"
     }
 }
