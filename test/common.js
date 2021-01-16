@@ -62,6 +62,7 @@ exports.createCtx = (overrides, { path }) => {
         query: {},
         caller: {},
         configuration: {},
+        ...{ path },
         ...overrides,
         fusebit: {
             functionAccessToken: profile.accessToken,
