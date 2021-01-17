@@ -45,6 +45,11 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.1.0
+
+-   Support for composing multiple OAuth connectors to create complex integrations involving several systems.
+-   Update @fusebit/add-on-sdk dependency to 3.1.0, refactor creation of Express router.
+
 ### v1.0.0
 
 -   Initial implementation.
