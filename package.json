@@ -1,27 +1,28 @@
 {
-    "name": "@fusebit/oauth-connector",
-    "version": "1.1.0-pre-1",
-    "description": "Fusebit Connector for OAuth",
-    "main": "lib/index.js",
-    "license": "MIT",
-    "author": "https://fusebit.io",
-    "packageAs": "@fusebit/oauth-connector",
-    "keywords": [],
-    "peerDependencies": {
-        "superagent": "6.1.0"
-    },
-    "dependencies": {
-        "express": "4.17.1",
-        "@fusebit/add-on-sdk": "3.1.0"
-    },
-    "devDependencies": {
-        "prettier": "^2.0.5",
-        "jest": "^24.9.0",
-        "uuid": "^8.3.2",
-        "superagent": "6.1.0"
-    },
-    "scripts": {
-        "test": "jest --colors",
-        "coverage": "jest --colors --coverage"
-    }
+  "name": "@fusebit/oauth-connector",
+  "version": "1.1.0-pre-1",
+  "description": "Fusebit Connector for OAuth",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "author": "https://fusebit.io",
+  "packageAs": "@fusebit/oauth-connector",
+  "keywords": [],
+  "peerDependencies": {
+    "superagent": "6.1.0"
+  },
+  "dependencies": {
+    "express": "4.17.1",
+    "@fusebit/add-on-sdk": "3.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "jest": "^24.9.0",
+    "uuid": "^8.3.2",
+    "superagent": "6.1.0"
+  },
+  "scripts": {
+    "test": "jest --colors",
+    "coverage": "jest --colors --coverage",
+    "prettier": "prettier --write ./lib ./test"
+  }
 }

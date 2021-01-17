@@ -1,103 +1,106 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
-        <title>##vendorName##</title>
-        <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.production.min.js" crossorigin="anonymous"></script>
-        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-        <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,700&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    </head>
-    <body>
-        <div id="root"></div>
-        <script type="text/babel">
-            const {
-                createMuiTheme,
-                ThemeProvider,
-                Button,
-                Dialog,
-                DialogContent,
-                DialogContentText,
-                DialogTitle,
-                DialogActions,
-            } = MaterialUI;
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+    <title>##vendorName##</title>
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+    <script
+      src="https://unpkg.com/@material-ui/core@latest/umd/material-ui.production.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {
+          createMuiTheme,
+          ThemeProvider,
+          Button,
+          Dialog,
+          DialogContent,
+          DialogContentText,
+          DialogTitle,
+          DialogActions,
+      } = MaterialUI;
 
-            const FusebitTheme = {
-                ...createMuiTheme({
-                    // Overrides of default MUI theme:
-                    typography: {
-                        fontFamily: '"Nunito Sans", sans-serif'
-                    },
-                    palette: {
-                        primary: {
-                            main: '#03032D' // FusebitColor.black
-                        },
-                        secondary: {
-                            main: '#FB310A' // FusebitColor.red
-                        }
-                    },
-                    overrides: {
-                        MuiTab: {
-                            wrapper: {
-                                fontFamily: '"Poppins", sans-serif'
-                            }
-                        },
-                        MuiButton: {
-                            root: {
-                                borderRadius: "100px"
-                            },
-                            label: {
-                                fontFamily: '"Poppins", sans-serif'
-                            }
-                        }
-                    }
-                })
-            };
+      const FusebitTheme = {
+          ...createMuiTheme({
+              // Overrides of default MUI theme:
+              typography: {
+                  fontFamily: '"Nunito Sans", sans-serif'
+              },
+              palette: {
+                  primary: {
+                      main: '#03032D' // FusebitColor.black
+                  },
+                  secondary: {
+                      main: '#FB310A' // FusebitColor.red
+                  }
+              },
+              overrides: {
+                  MuiTab: {
+                      wrapper: {
+                          fontFamily: '"Poppins", sans-serif'
+                      }
+                  },
+                  MuiButton: {
+                      root: {
+                          borderRadius: "100px"
+                      },
+                      label: {
+                          fontFamily: '"Poppins", sans-serif'
+                      }
+                  }
+              }
+          })
+      };
 
 
-            function App() {
-                const returnTo = ##returnTo##;
-                const state = ##state##;
+      function App() {
+          const returnTo = ##returnTo##;
+          const state = ##state##;
 
-                const getReturnUrl = (status, data) => {
-                    let url = `${returnTo}?status=${status}&data=${encodeURIComponent(
-                        btoa(JSON.stringify(data))
-                    )}`;
-                    if (state !== null) {
-                        url += `&state=${encodeURIComponent(state)}`;
-                    }
-                    return url;
-                }
+          const getReturnUrl = (status, data) => {
+              let url = `${returnTo}?status=${status}&data=${encodeURIComponent(
+                  btoa(JSON.stringify(data))
+              )}`;
+              if (state !== null) {
+                  url += `&state=${encodeURIComponent(state)}`;
+              }
+              return url;
+          }
 
-                const handleCancel = () => {
-                    let newData = { status: 400, message: "Function creation cancelled" };
-                    window.location.href = getReturnUrl("error", newData);
-                };
+          const handleCancel = () => {
+              let newData = { status: 400, message: "Function creation cancelled" };
+              window.location.href = getReturnUrl("error", newData);
+          };
 
-                return (
-                    <Dialog open={true} fullWidth maxWidth="sm" disableBackdropClick disableEscapeKeyDown>
-                        <DialogTitle>Creating <strong>##vendorName##</strong> connector</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>The integration requires access to data in your ##vendorName## account. Please proceed to the next step to authorize access.</DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button variant="text" onClick={handleCancel}>Cancel</Button>
-                            <Button variant="contained" color="primary" href="##authorizationUrl##">Next</Button>
-                        </DialogActions>
-                    </Dialog>
-                )
-            }
+          return (
+              <Dialog open={true} fullWidth maxWidth="sm" disableBackdropClick disableEscapeKeyDown>
+                  <DialogTitle>Creating <strong>##vendorName##</strong> connector</DialogTitle>
+                  <DialogContent>
+                      <DialogContentText>The integration requires access to data in your ##vendorName## account. Please proceed to the next step to authorize access.</DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                      <Button variant="text" onClick={handleCancel}>Cancel</Button>
+                      <Button variant="contained" color="primary" href="##authorizationUrl##">Next</Button>
+                  </DialogActions>
+              </Dialog>
+          )
+      }
 
-            ReactDOM.render(
-                <ThemeProvider theme={FusebitTheme}>
-                    <App />
-                </ThemeProvider>,
-                document.getElementById('root')
-            );
-        </script>
-    </body>
+      ReactDOM.render(
+          <ThemeProvider theme={FusebitTheme}>
+              <App />
+          </ThemeProvider>,
+          document.getElementById('root')
+      );
+    </script>
+  </body>
 </html>
