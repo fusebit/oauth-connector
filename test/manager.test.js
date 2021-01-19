@@ -156,7 +156,7 @@ describe('manager', () => {
     expect(response.status).toBe(200);
     ctx = uninstallCtx;
     response = await manager(ctx);
-    expect([204]).toContain(response.status);
+    expect(response.status).toBe(204);
     response = await getFunction(testBoundaryId, testFunctionId2);
     expect(response.status).toBe(404);
   });

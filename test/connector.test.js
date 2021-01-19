@@ -148,6 +148,37 @@ const getForeignTokenCtx = createCtx(
   }
 );
 
+const deleteCtx = createCtx(
+  {
+    method: 'DELETE',
+    configuration: {
+      vendor_oauth_authorization_url: 'https://idp.com/authorize',
+      vendor_oauth_token_url: 'https://idp.com/token',
+      vendor_oauth_scope: 'sample-scope',
+      vendor_oauth_audience: 'sample-audience',
+      vendor_oauth_client_id: '123',
+      vendor_oauth_client_secret: '456',
+      vendor_oauth_extra_params: 'sample-extra-param=12',
+      vendor_name: 'Contoso',
+      vendor_prefix: 'contoso',
+      fusebit_allowed_return_to: '*',
+    },
+    caller: {
+      permissions: {
+        allow: [
+          {
+            action: '*',
+            resource: '/',
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: `/`,
+  }
+);
+
 const getHealthCtx = createCtx(
   {
     configuration: {
@@ -853,6 +884,50 @@ describe('connector', () => {
     expect(response.status).toBe(302);
     // Delete the user
     ctx = deleteForeignUserCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(204);
+    // Validate storage content for the deleted user is deleted
+    response = await getStorage(testBoundaryId, testFunctionId1, oAuthConnector._getStorageIdForVendorUser('789'));
+    expect(response.status).toBe(404);
+    // Validate the GET user returns 404
+    ctx = getUserCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(404);
+  });
+
+  test('The DELETE / deletes the storage', async () => {
+    const { VendorOAuthConnector } = require('../lib/manager/template/VendorOAuthConnector');
+    class TestOAuthConnector extends VendorOAuthConnector {
+      async getAuthorizationPageHtml(fusebitContext, authorizationUrl) {
+        return undefined;
+      }
+      async getAccessToken(fusebitContext, authorizationCode, redirectUri) {
+        return {
+          access_token: `access-token:${authorizationCode}`,
+          expires_in: 10000,
+        };
+      }
+      async getUserProfile(tokenContext) {
+        return { id: '789' };
+      }
+    }
+    const oAuthConnector = new TestOAuthConnector();
+    const handler = connector.createOAuthConnector(new TestOAuthConnector());
+    let ctx = configureCtx;
+    // Initiate the authorization transaction only to extract the 'state' parameter to pass to /callback later
+    let response = await handler(ctx);
+    expect(response.status).toBe(302);
+    expect(response.headers).toBeDefined();
+    expect(typeof response.headers.location).toBe('string');
+    let url = Url.parse(response.headers.location, true);
+    expect(url.query.state).toBeDefined();
+
+    // Create user and validate is is deleted
+    ctx = callbackCtx(url.query.state);
+    response = await handler(ctx);
+    expect(response.status).toBe(302);
+    // Delete connector
+    ctx = deleteCtx;
     response = await handler(ctx);
     expect(response.status).toBe(204);
     // Validate storage content for the deleted user is deleted
