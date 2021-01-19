@@ -16,6 +16,9 @@ const Url = require('url');
 
 const profile = getCredentials();
 
+const vendorId = 'foobar';
+const vendorUserId = 'u123';
+
 const configureCtx = createCtx(
   {
     query: {
@@ -29,8 +32,8 @@ const configureCtx = createCtx(
           boundaryId: testBoundaryId,
           functionId: testFunctionId2,
           templateName: 'test-template-name',
-          foobar_oauth_user_id: 'u123',
-          foobar_oauth_connector_base_url: 'https://idontexist',
+          [`${vendorId}_oauth_user_id`]: vendorUserId,
+          [`${vendorId}_oauth_connector_base_url`]: 'https://idontexist',
         })
       ).toString('base64'),
     },
@@ -115,6 +118,96 @@ const getTokenCtx = createCtx(
   }
 );
 
+const getForeignTokenCtx = createCtx(
+  {
+    configuration: {
+      vendor_oauth_authorization_url: 'https://idp.com/authorize',
+      vendor_oauth_token_url: 'https://idp.com/token',
+      vendor_oauth_scope: 'sample-scope',
+      vendor_oauth_audience: 'sample-audience',
+      vendor_oauth_client_id: '123',
+      vendor_oauth_client_secret: '456',
+      vendor_oauth_extra_params: 'sample-extra-param=12',
+      vendor_name: 'Contoso',
+      vendor_prefix: 'contoso',
+      fusebit_allowed_return_to: '*',
+    },
+    caller: {
+      permissions: {
+        allow: [
+          {
+            action: '*',
+            resource: '/',
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: `/foreign-user/${vendorId}/${vendorUserId}/token`,
+  }
+);
+
+const getHealthCtx = createCtx(
+  {
+    configuration: {
+      vendor_oauth_authorization_url: 'https://idp.com/authorize',
+      vendor_oauth_token_url: 'https://idp.com/token',
+      vendor_oauth_scope: 'sample-scope',
+      vendor_oauth_audience: 'sample-audience',
+      vendor_oauth_client_id: '123',
+      vendor_oauth_client_secret: '456',
+      vendor_oauth_extra_params: 'sample-extra-param=12',
+      vendor_name: 'Contoso',
+      vendor_prefix: 'contoso',
+      fusebit_allowed_return_to: '*',
+    },
+    caller: {
+      permissions: {
+        allow: [
+          {
+            action: '*',
+            resource: '/',
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: `/user/789/health`,
+  }
+);
+
+const getForeignHealthCtx = createCtx(
+  {
+    configuration: {
+      vendor_oauth_authorization_url: 'https://idp.com/authorize',
+      vendor_oauth_token_url: 'https://idp.com/token',
+      vendor_oauth_scope: 'sample-scope',
+      vendor_oauth_audience: 'sample-audience',
+      vendor_oauth_client_id: '123',
+      vendor_oauth_client_secret: '456',
+      vendor_oauth_extra_params: 'sample-extra-param=12',
+      vendor_name: 'Contoso',
+      vendor_prefix: 'contoso',
+      fusebit_allowed_return_to: '*',
+    },
+    caller: {
+      permissions: {
+        allow: [
+          {
+            action: '*',
+            resource: '/',
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: `/foreign-user/${vendorId}/${vendorUserId}/health`,
+  }
+);
+
 const getUserCtx = createCtx(
   {
     configuration: {
@@ -171,7 +264,7 @@ const getForeignUserCtx = createCtx(
     },
   },
   {
-    path: `/foreign-user/foobar/u123`,
+    path: `/foreign-user/${vendorId}/${vendorUserId}`,
   }
 );
 
@@ -237,6 +330,37 @@ const deleteUserCtx = createCtx(
   },
   {
     path: `/user/789`,
+  }
+);
+
+const deleteForeignUserCtx = createCtx(
+  {
+    method: 'DELETE',
+    configuration: {
+      vendor_oauth_authorization_url: 'https://idp.com/authorize',
+      vendor_oauth_token_url: 'https://idp.com/token',
+      vendor_oauth_scope: 'sample-scope',
+      vendor_oauth_audience: 'sample-audience',
+      vendor_oauth_client_id: '123',
+      vendor_oauth_client_secret: '456',
+      vendor_oauth_extra_params: 'sample-extra-param=12',
+      vendor_name: 'Contoso',
+      vendor_prefix: 'contoso',
+      fusebit_allowed_return_to: '*',
+    },
+    caller: {
+      permissions: {
+        allow: [
+          {
+            action: '*',
+            resource: '/',
+          },
+        ],
+      },
+    },
+  },
+  {
+    path: `/foreign-user/${vendorId}/${vendorUserId}`,
   }
 );
 
@@ -392,7 +516,7 @@ describe('connector', () => {
     expect(response.body.data.vendorUserProfile).toBeDefined();
     expect(response.body.data.foreignOAuthIdentities).toBeDefined();
     expect(response.body.data.foreignOAuthIdentities.foobar).toBeDefined();
-    expect(response.body.data.foreignOAuthIdentities.foobar.userId).toBe('u123');
+    expect(response.body.data.foreignOAuthIdentities.foobar.userId).toBe(vendorUserId);
     expect(response.body.data.foreignOAuthIdentities.foobar.connectorBaseUrl).toBe('https://idontexist');
     expect(response.body.data.foo).toBe('bar');
     expect(response.body.data.dataPassedToBindUser).toMatchObject(
@@ -405,14 +529,14 @@ describe('connector', () => {
     response = await getStorage(
       testBoundaryId,
       testFunctionId1,
-      oAuthConnector._getStorageIdForVendorUser('u123', 'foobar')
+      oAuthConnector._getStorageIdForVendorUser(vendorUserId, vendorId)
     );
     expect(response.status).toBe(200);
     expect(response.body).toBeDefined();
     expect(response.body.data).toBeDefined();
     expect(response.body.data.vendorUserId).toBe(data.contoso_oauth_user_id);
     // Validate getUser works for the foreign user
-    const user1 = await oAuthConnector.getUser(configureCtx, 'u123', 'foobar');
+    const user1 = await oAuthConnector.getUser(configureCtx, vendorUserId, vendorId);
     expect(user1).toMatchObject(user);
     // Validate ensureAccessToken works for the connector user
     response = await oAuthConnector.ensureAccessToken(configureCtx, user);
@@ -422,7 +546,7 @@ describe('connector', () => {
     expect(response.expires_at).toBeDefined();
     // Validate ensureAccessToken throws for foreign user
     try {
-      await oAuthConnector.ensureAccessToken(configureCtx, user, 'foobar');
+      await oAuthConnector.ensureAccessToken(configureCtx, user, vendorId);
       throw new Error('Passed');
     } catch (e) {
       expect(e.message).toMatch(/ENOTFOUND idontexist/);
@@ -438,7 +562,7 @@ describe('connector', () => {
     response = await getStorage(
       testBoundaryId,
       testFunctionId1,
-      oAuthConnector._getStorageIdForVendorUser('u123', 'foobar')
+      oAuthConnector._getStorageIdForVendorUser(vendorUserId, vendorId)
     );
     expect(response.status).toBe(404);
   });
@@ -498,12 +622,12 @@ describe('connector', () => {
     response = await getStorage(
       testBoundaryId,
       testFunctionId1,
-      oAuthConnector._getStorageIdForVendorUser('u123', 'foobar')
+      oAuthConnector._getStorageIdForVendorUser(vendorUserId, vendorId)
     );
     expect(response.status).toBe(404);
   });
 
-  test('The /user/:vendorUserId/token endpoint returns access token', async () => {
+  test('The /user/:vendorUserId/token and /foreign-user/:vendorId/:vendorUserId/token endpoints return access token', async () => {
     const { VendorOAuthConnector } = require('../lib/manager/template/VendorOAuthConnector');
     class TestOAuthConnector extends VendorOAuthConnector {
       async getAuthorizationPageHtml(fusebitContext, authorizationUrl) {
@@ -519,7 +643,6 @@ describe('connector', () => {
         return { id: '789' };
       }
     }
-    const oAuthConnector = new TestOAuthConnector();
     const handler = connector.createOAuthConnector(new TestOAuthConnector());
     let ctx = configureCtx;
     // Initiate the authorization transaction only to extract the 'state' parameter to pass to /callback later
@@ -537,10 +660,59 @@ describe('connector', () => {
     response = await handler(ctx);
     expect(response.status).toBe(200);
     expect(typeof response.body).toBe('string');
-    const body = JSON.parse(response.body);
+    let body = JSON.parse(response.body);
     expect(body.access_token).toBe('access-token:abc');
     expect(body.expires_in).toBe(10000);
     expect(body.expires_at).toBeDefined();
+    // Get the current access token for the logged in user using foreign user id
+    ctx = getForeignTokenCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(200);
+    expect(typeof response.body).toBe('string');
+    body = JSON.parse(response.body);
+    expect(body.access_token).toBe('access-token:abc');
+    expect(body.expires_in).toBe(10000);
+    expect(body.expires_at).toBeDefined();
+  });
+
+  test('The /user/:vendorUserId/health and /foreign-user/:vendorId/:vendorUserId/health endpoints return user health', async () => {
+    const { VendorOAuthConnector } = require('../lib/manager/template/VendorOAuthConnector');
+    class TestOAuthConnector extends VendorOAuthConnector {
+      async getAuthorizationPageHtml(fusebitContext, authorizationUrl) {
+        return undefined;
+      }
+      async getAccessToken(fusebitContext, authorizationCode, redirectUri) {
+        return {
+          access_token: `access-token:${authorizationCode}`,
+          expires_in: 10000,
+        };
+      }
+      async getUserProfile(tokenContext) {
+        return { id: '789' };
+      }
+    }
+    const handler = connector.createOAuthConnector(new TestOAuthConnector());
+    let ctx = configureCtx;
+    // Initiate the authorization transaction only to extract the 'state' parameter to pass to /callback later
+    let response = await handler(ctx);
+    expect(response.status).toBe(302);
+    expect(response.headers).toBeDefined();
+    expect(typeof response.headers.location).toBe('string');
+    let url = Url.parse(response.headers.location, true);
+    expect(url.query.state).toBeDefined();
+    ctx = callbackCtx(url.query.state);
+    response = await handler(ctx);
+    expect(response.status).toBe(302);
+    // Get the current access token for the logged in user
+    ctx = getHealthCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body).toBe('');
+    // Get the current access token for the logged in user using foreign user id
+    ctx = getForeignHealthCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(200);
+    expect(response.body).toBe('');
   });
 
   test('The GET /user/:vendorUserId endpoint returns user data', async () => {
@@ -559,7 +731,6 @@ describe('connector', () => {
         return { id: '789' };
       }
     }
-    const oAuthConnector = new TestOAuthConnector();
     const handler = connector.createOAuthConnector(new TestOAuthConnector());
     let ctx = configureCtx;
     // Initiate the authorization transaction only to extract the 'state' parameter to pass to /callback later
@@ -577,7 +748,7 @@ describe('connector', () => {
     response = await handler(ctx);
     expect(response.status).toBe(200);
     expect(typeof response.body).toBe('string');
-    const body = JSON.parse(response.body);
+    let body = JSON.parse(response.body);
     expect(body.status).toBe('authenticated');
     expect(body.vendorUserId).toBe('789');
     expect(body.vendorUserProfile).toMatchObject({ id: '789' });
@@ -633,7 +804,7 @@ describe('connector', () => {
     expect(body.vendorToken.expires_at).toBeDefined();
   });
 
-  test('The DELETE /user/:vendorUserId endpoint deletes the user', async () => {
+  test('The DELETE /user/:vendorUserId and /foreign-user/:vendorId/:vendorUserId endpoints delete the user', async () => {
     const { VendorOAuthConnector } = require('../lib/manager/template/VendorOAuthConnector');
     class TestOAuthConnector extends VendorOAuthConnector {
       async getAuthorizationPageHtml(fusebitContext, authorizationUrl) {
@@ -659,11 +830,29 @@ describe('connector', () => {
     expect(typeof response.headers.location).toBe('string');
     let url = Url.parse(response.headers.location, true);
     expect(url.query.state).toBeDefined();
+
+    // Create user and validate is is deleted
     ctx = callbackCtx(url.query.state);
     response = await handler(ctx);
     expect(response.status).toBe(302);
     // Delete the user
     ctx = deleteUserCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(204);
+    // Validate storage content for the deleted user is deleted
+    response = await getStorage(testBoundaryId, testFunctionId1, oAuthConnector._getStorageIdForVendorUser('789'));
+    expect(response.status).toBe(404);
+    // Validate the GET user returns 404
+    ctx = getUserCtx;
+    response = await handler(ctx);
+    expect(response.status).toBe(404);
+
+    // Create user and validate is is deleted using foreign ID
+    ctx = callbackCtx(url.query.state);
+    response = await handler(ctx);
+    expect(response.status).toBe(302);
+    // Delete the user
+    ctx = deleteForeignUserCtx;
     response = await handler(ctx);
     expect(response.status).toBe(204);
     // Validate storage content for the deleted user is deleted
