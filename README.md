@@ -45,6 +45,10 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.2.1
+
+- Fix error in callback page of the /test endpoint
+
 ### v1.2.0
 
 - Support for the test web page at /test
