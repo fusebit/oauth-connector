@@ -45,6 +45,14 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.2.0
+
+- Support for the test web page at /test
+
+### v1.1.1
+
+- Fix bug to delete connector's storage when the connector is deleted.
+
 ### v1.1.0
 
 - Support for composing multiple OAuth connectors to create complex integrations involving several systems.
