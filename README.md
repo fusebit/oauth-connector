@@ -45,6 +45,10 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.2.3
+
+- Fix bug to pass redirectUri to refreshAccessToken, and add it as query parameter to the token request
+
 ### v1.2.2
 
 - Fix another error in callback page of the /test endpoint
