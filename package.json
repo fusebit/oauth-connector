@@ -1,6 +1,6 @@
 {
   "name": "@fusebit/oauth-connector",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Fusebit Connector for OAuth",
   "main": "lib/index.js",
   "license": "MIT",
