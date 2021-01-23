@@ -45,6 +45,10 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.2.4
+
+- Fix bug to refresh access tokens using HTTP POST with form encoded body payload
+
 ### v1.2.3
 
 - Fix bug to pass redirectUri to refreshAccessToken, and add it as query parameter to the token request
