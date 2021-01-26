@@ -45,6 +45,11 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.2.5
+
+- Fix bug in the logic waiting for a concurrent access token refresh
+- Include previous refresh_token from response to OAuthConnector.refreshAccessToken if new one had not been issued
+
 ### v1.2.4
 
 - Fix bug to refresh access tokens using HTTP POST with form encoded body payload
