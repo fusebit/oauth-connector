@@ -45,6 +45,10 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.3.0
+
+- Change order of configuration flow to first ask about OAuth authorization before redirecting to additional settings managers.
+
 ### v1.2.5
 
 - Fix bug in the logic waiting for a concurrent access token refresh
