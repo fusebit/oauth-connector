@@ -45,6 +45,10 @@ debug=1 FUSE_PROFILE={profile-name} npm test
 
 ## Release notes
 
+### v1.3.1
+
+- Fix bug in the token refresh logic that resulted in the identity being stuck in a refreshing state with an expired access token.
+
 ### v1.3.0
 
 - Change order of configuration flow to first ask about OAuth authorization before redirecting to additional settings managers.
